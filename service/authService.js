@@ -12,15 +12,14 @@ exports.userLogin = async ({ username, password }) => {
   const user = await models.User.findOne({ email: username }).select(
     '+password'
   );
-  console.log('user', user);
   if (!user) {
-    return res.status(401).json({ message: 'Invalid username' });
+    return [{ message: 'Invalid username' }, null];
   }
 
   const match = await bcrypt.compare(password, user.password);
 
   if (!match) {
-    return res.status(401).json({ message: 'Invalid password' });
+    return [{ message: 'Invalid password' }, null];
   }
 
   const { email, _id, mobileNumber, firstName, lastName } = user;
@@ -39,16 +38,19 @@ exports.userLogin = async ({ username, password }) => {
     expiresIn: `${envVars.JWT_EXPIRY}h`
   });
 
+  await models.UserLogger.deleteMany({ userId: userData.id });
+
   await models.UserLogger.create({ userId: userData.id, token, expiresAt });
 
-  return {
+  const data = {
     token,
     expiresAt: moment(expiresAt).format('YYYY-MM-DDTHH:mm:ss'),
     userDetails: userData
   };
+  return [null, data];
 };
 
 exports.userLogout = async (token) => {
-  const user = await models.UserLogger.deleteOne({token})
-  return user.deleteCount !== 0
-}
+  const user = await models.UserLogger.deleteOne({ token });
+  return user.deleteCount !== 0;
+};

@@ -13,10 +13,13 @@ exports.register = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
-  const data = await userLogin({
+  const [error, data] = await userLogin({
     username: req.body.username,
     password: req.body.password
   });
+  if(error) {
+    return res.status(200).json({message: error.message})
+  }
   return res.status(200).json(data);
 };
 

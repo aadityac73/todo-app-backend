@@ -14,7 +14,9 @@ const checkName = (val, param) => {
 const checkPassword = (val) => {
   const re = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#$%&-]).{8,}/;
   if (!re.test(val)) {
-    return Promise.reject('please check password format');
+    return Promise.reject(
+      'password should be atleast 8 characters long, and should contain atleast one uppercase letter, one lowercase letter, one numeric character, one special symbol'
+    );
   }
   return true;
 };
